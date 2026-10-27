@@ -24,7 +24,8 @@ Because there are no report IDs, HID APIs (hidapi, HidSharp, Windows `WriteFile`
 leading `0x00` byte, i.e. 65 bytes per write. The 64 bytes below are what follows that byte.
 
 The device does not need to be initialised. The official software sends one update packet
-every **250 ms**; the display keeps showing the last values when updates stop.
+every **250 ms**. When updates stop, the display turns itself off after a short timeout
+(exact duration not measured yet), so a driver has to keep sending.
 
 ## Update packet (`01 02`)
 
@@ -103,5 +104,6 @@ At 1234 RPM the fan bar is about half full; the full-scale value is not known ye
 ## Open questions
 
 - Full scale of the fan bar graph.
+- How long the display stays on after the last update packet.
 - Whether other LCD models use the remaining fields — please report what yours shows.
 - The input report is never read by the official software; its meaning is unknown.
