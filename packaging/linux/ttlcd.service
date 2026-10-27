@@ -3,6 +3,7 @@ Description=Thermaltake segment LCD driver
 After=multi-user.target
 
 [Service]
+Type=notify
 ExecStart=/usr/local/bin/ttlcd run --config /etc/ttlcd/config.json
 Restart=on-failure
 RestartSec=5

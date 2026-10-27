@@ -41,29 +41,34 @@ Download the latest build for your platform from the
 
 ### Windows
 
-Reading CPU temperatures and mainboard fan headers requires **administrator rights** and the
-**[PawnIO](https://pawnio.eu/)** driver (used by [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor),
-which replaces the old WinRing0 driver that Windows Defender now blocks). GPU values, CPU usage
-and RAM work without it.
+Reading CPU temperatures and mainboard fan headers needs the **[PawnIO](https://pawnio.eu/)**
+driver (used by [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor);
+it replaces the old WinRing0 driver that Windows Defender now blocks) and elevated rights.
+The recommended setup is a **Windows service**: it runs as SYSTEM and starts at boot, so you only
+need administrator rights once, for the installation. GPU values, CPU usage and RAM also work
+without PawnIO.
 
-> ℹ️ Builds are **not code-signed yet**. If Windows 11 *Smart App Control* is on, it blocks
-> `ttlcd.exe`. Until signed releases exist, run it from source with the .NET SDK
-> (`dotnet run --project src/TtLcd -- run`). Do **not** turn Smart App Control off for this —
-> it cannot be turned back on without reinstalling Windows.
+1. Install PawnIO from <https://pawnio.eu/> or with `winget install --id namazso.PawnIO`.
+2. Copy ttlcd to a permanent folder that only administrators can change, e.g. `C:\Program Files\ttlcd`
+   (the service runs from there).
+3. In an **administrator** terminal:
+   ```powershell
+   cd "C:\Program Files\ttlcd"
+   .\ttlcd.exe list               # optional: shows all sensors and what the LCD will display
+   .\ttlcd.exe install-service    # creates config, registers and starts the service
+   ```
 
-1. Install PawnIO from <https://pawnio.eu/>.
-2. Unpack `ttlcd.exe` to a folder, e.g. `C:\Tools\ttlcd`.
-3. In an **administrator** terminal, try it:
-   ```powershell
-   .\ttlcd.exe list     # shows all sensors and what the LCD will display
-   .\ttlcd.exe run      # updates the LCD until Ctrl+C
-   ```
-4. Start it automatically at boot (hidden, runs as SYSTEM):
-   ```powershell
-   .\ttlcd.exe init-config --config C:\ProgramData\ttlcd\config.json
-   .\install-autostart.ps1 -ExePath C:\Tools\ttlcd\ttlcd.exe
-   ```
-   Remove it again with `uninstall-autostart.ps1`. Both scripts are in [packaging/windows](packaging/windows).
+The service keeps its config in `C:\ProgramData\ttlcd\config.json` (run `Restart-Service ttlcd`
+after editing) and logs to `C:\ProgramData\ttlcd\ttlcd.log`. Remove it with
+`.\ttlcd.exe uninstall-service`. While the service runs, don't start a second `ttlcd run`.
+
+> ℹ️ **Smart App Control:** builds are **not code-signed yet**, so Windows 11 with
+> *Smart App Control* blocks `ttlcd.exe`. Use the framework-dependent build `ttlcd-portable`
+> instead, which runs through Microsoft's signed `dotnet` host: install the
+> [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) and replace `.\ttlcd.exe`
+> with `dotnet ttlcd.dll` in the commands above — the service is then registered the same way.
+> Do **not** turn Smart App Control off for this — it cannot be turned back on without
+> reinstalling Windows.
 
 ### Linux
 
@@ -98,6 +103,10 @@ ttlcd [command] [--config <path>]
   init-config   Write a config file with the current sensor choices
   demo          Show fixed test values on the LCD
   off           Switch the LCD off
+
+Windows (as administrator):
+  install-service     Run ttlcd as a Windows service that starts at boot
+  uninstall-service   Remove the service
 ```
 
 ## Configuration
@@ -107,6 +116,7 @@ fastest core clock, first spinning fan, a fan header named "pump"/"AIO" for the 
 To choose yourself, run `ttlcd init-config`, then edit the file. Sensor IDs come from `ttlcd list`.
 
 Default location: `%APPDATA%\ttlcd\config.json` (Windows), `~/.config/ttlcd/config.json` (Linux).
+The Windows service uses `C:\ProgramData\ttlcd\config.json`, the systemd unit `/etc/ttlcd/config.json`.
 
 ```jsonc
 {
@@ -144,15 +154,17 @@ src/TtLcd/
   Sensors/    LhmSensorSource (Windows, LibreHardwareMonitor)
               LinuxSensorSource (hwmon, /proc, RAPL) + NvmlGpuReader (NVIDIA)
               SensorSelector – maps sensors to LCD fields
-  LcdService  main loop: read sensors → send packet, reconnect on unplug
+  LcdService  main loop: sensors on their own thread, packet every 250 ms, reconnect on unplug
+  LcdWorker / WindowsService   service hosting (Windows service, systemd) and install commands
 tests/TtLcd.Tests/
 docs/PROTOCOL.md
-packaging/    autostart scripts (Windows), udev rule + systemd unit (Linux)
+packaging/    udev rule + systemd unit (Linux)
 ```
 
 ## Roadmap
 
-- [x] Restore the LCD functionality of the original software (CLI / background service)
+- [x] Restore the LCD functionality of the original software (CLI)
+- [x] Run as a Windows service / systemd service, starting at boot
 - [ ] Tray app / GUI for choosing sensors
 - [ ] Show coolant temperature (e.g. ASUS "Water In/Out" headers) on a free field
 - [ ] Code-signed Windows releases (e.g. via SignPath Foundation for open-source projects)

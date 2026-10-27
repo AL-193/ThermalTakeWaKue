@@ -31,10 +31,31 @@ jobs:
       - name: Add packaging files
         shell: bash
         run: |
-          if [ "${{ matrix.rid }}" = "win-x64" ]; then cp packaging/windows/*.ps1 publish/; else cp packaging/linux/* publish/; fi
-          cp README.md publish/
+          if [ "${{ matrix.rid }}" = "linux-x64" ]; then cp packaging/linux/* publish/; fi
+          cp README.md LICENSE publish/
 
       - uses: actions/upload-artifact@v4
         with:
           name: ttlcd-${{ matrix.rid }}
+          path: publish/
+
+  # Runs via `dotnet ttlcd.dll` on any OS with the .NET 10 runtime. Needed on Windows
+  # with Smart App Control until the self-contained exe is code-signed.
+  portable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish
+        run: |
+          dotnet publish src/TtLcd -c Release -p:UseAppHost=false -o publish
+          cp README.md LICENSE publish/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ttlcd-portable
           path: publish/

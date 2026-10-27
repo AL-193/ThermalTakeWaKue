@@ -34,29 +34,33 @@ Releases — oder [selbst bauen](README.md#building).
 
 ### Windows
 
-Für CPU-Temperaturen und Mainboard-Lüfteranschlüsse sind **Administratorrechte** und der Treiber
-**[PawnIO](https://pawnio.eu/)** nötig (wird von [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)
-verwendet und ersetzt den alten WinRing0-Treiber, den Windows Defender inzwischen blockiert).
-GPU-Werte, CPU-Auslastung und RAM funktionieren auch ohne.
+Für CPU-Temperaturen und Mainboard-Lüfteranschlüsse sind der Treiber **[PawnIO](https://pawnio.eu/)**
+(wird von [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) verwendet
+und ersetzt den alten WinRing0-Treiber, den Windows Defender inzwischen blockiert) und erhöhte Rechte nötig.
+Empfohlen ist deshalb ein **Windows-Dienst**: Er läuft als SYSTEM und startet mit Windows — Administratorrechte
+braucht man nur einmal bei der Einrichtung. GPU-Werte, CPU-Auslastung und RAM gehen auch ohne PawnIO.
 
-> ℹ️ Die Builds sind **noch nicht code-signiert**. Ist in Windows 11 *Smart App Control* aktiv,
-> wird `ttlcd.exe` blockiert. Bis es signierte Releases gibt, aus dem Quellcode mit dem .NET SDK
-> starten (`dotnet run --project src/TtLcd -- run`). Smart App Control dafür **nicht** abschalten —
-> es lässt sich ohne Windows-Neuinstallation nicht wieder einschalten.
+1. PawnIO von <https://pawnio.eu/> oder per `winget install --id namazso.PawnIO` installieren.
+2. ttlcd in einen festen Ordner kopieren, den nur Administratoren ändern dürfen, z. B.
+   `C:\Program Files\ttlcd` (der Dienst läuft von dort).
+3. In einem **Administrator**-Terminal:
+   ```powershell
+   cd "C:\Program Files\ttlcd"
+   .\ttlcd.exe list               # optional: zeigt alle Sensoren und was das LCD anzeigen wird
+   .\ttlcd.exe install-service    # legt die Konfiguration an, registriert und startet den Dienst
+   ```
 
-1. PawnIO von <https://pawnio.eu/> installieren.
-2. `ttlcd.exe` in einen Ordner entpacken, z. B. `C:\Tools\ttlcd`.
-3. In einem **Administrator**-Terminal ausprobieren:
-   ```powershell
-   .\ttlcd.exe list     # zeigt alle Sensoren und was das LCD anzeigen wird
-   .\ttlcd.exe run      # aktualisiert das LCD bis Strg+C
-   ```
-4. Automatisch beim Systemstart ausführen (unsichtbar, läuft als SYSTEM):
-   ```powershell
-   .\ttlcd.exe init-config --config C:\ProgramData\ttlcd\config.json
-   .\install-autostart.ps1 -ExePath C:\Tools\ttlcd\ttlcd.exe
-   ```
-   Entfernen mit `uninstall-autostart.ps1`. Beide Skripte liegen in [packaging/windows](packaging/windows).
+Konfiguration: `C:\ProgramData\ttlcd\config.json` (nach Änderungen `Restart-Service ttlcd`),
+Log: `C:\ProgramData\ttlcd\ttlcd.log`. Entfernen mit `.\ttlcd.exe uninstall-service`.
+Solange der Dienst läuft, kein zweites `ttlcd run` starten.
+
+> ℹ️ **Smart App Control:** Die Builds sind **noch nicht code-signiert**, deshalb blockiert Windows 11
+> mit aktivem *Smart App Control* die `ttlcd.exe`. Stattdessen die framework-abhängige Variante
+> `ttlcd-portable` nutzen, die über Microsofts signierten `dotnet`-Host läuft: die
+> [.NET-10-Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) installieren und in den Befehlen
+> oben `.\ttlcd.exe` durch `dotnet ttlcd.dll` ersetzen — der Dienst wird dann genauso eingerichtet.
+> Smart App Control dafür **nicht** abschalten — es lässt sich ohne Windows-Neuinstallation nicht
+> wieder einschalten.
 
 ### Linux
 

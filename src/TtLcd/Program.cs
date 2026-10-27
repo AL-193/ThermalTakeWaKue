@@ -1,5 +1,9 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Systemd;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using TtLcd;
 using TtLcd.Device;
 using TtLcd.Protocol;
@@ -16,6 +20,10 @@ const string Usage = """
       init-config   Write a config file with the current sensor choices
       demo          Show fixed test values on the LCD
       off           Switch the LCD off
+
+    Windows (as administrator):
+      install-service     Run ttlcd as a Windows service that starts at boot
+      uninstall-service   Remove the service
 
     Default config: {0}
     """;
@@ -42,21 +50,68 @@ try
         "init-config" => InitConfig(),
         "demo" => await Demo(),
         "off" => Off(),
+        "install-service" => InstallService(),
+        "uninstall-service" => UninstallService(),
         _ => Fail($"Unknown command '{command}'. Use --help."),
     };
 }
-catch (Exception e) when (e is IOException or System.Text.Json.JsonException or UnauthorizedAccessException)
+catch (Exception e) when (e is IOException or System.Text.Json.JsonException or UnauthorizedAccessException
+    or InvalidOperationException or System.ComponentModel.Win32Exception)
 {
     return Fail(e.Message);
 }
 
 async Task<int> Run()
 {
+    bool asService = WindowsServiceHelpers.IsWindowsService() || SystemdHelpers.IsSystemdService();
+    if (asService && OperatingSystem.IsWindows())
+        Log.ToFile(WindowsService.LogPath);
+
     var config = AppConfig.Load(configPath);
     Log.Info($"Config: {(File.Exists(configPath) ? configPath : "defaults (no file at " + configPath + ")")}");
     WarnIfUnprivileged();
+
+    if (asService)
+    {
+        var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddWindowsService(o => o.ServiceName = "ttlcd");
+        builder.Services.AddSystemd();
+        builder.Services.AddSingleton(config);
+        builder.Services.AddHostedService<LcdWorker>();
+        await builder.Build().RunAsync();
+        return 0;
+    }
+
     using var cts = CancelOnShutdown();
     await new LcdService(config).RunAsync(cts.Token);
+    return 0;
+}
+
+int InstallService()
+{
+    if (!OperatingSystem.IsWindows())
+        return Fail("On Linux, use packaging/linux/ttlcd.service (see README).");
+    if (!Environment.IsPrivilegedProcess)
+        return Fail("Run this command as administrator.");
+
+    if (!File.Exists(WindowsService.ConfigPath))
+        WriteAutoConfig(WindowsService.ConfigPath);
+    WindowsService.Install();
+    Console.WriteLine($"Service '{WindowsService.Name}' installed and started.");
+    Console.WriteLine($"  Config: {WindowsService.ConfigPath}  (restart the service after editing)");
+    Console.WriteLine($"  Log:    {WindowsService.LogPath}");
+    return 0;
+}
+
+int UninstallService()
+{
+    if (!OperatingSystem.IsWindows())
+        return Fail("Only available on Windows.");
+    if (!Environment.IsPrivilegedProcess)
+        return Fail("Run this command as administrator.");
+
+    WindowsService.Uninstall();
+    Console.WriteLine($"Service '{WindowsService.Name}' removed.");
     return 0;
 }
 
@@ -91,7 +146,13 @@ int List()
 
 int InitConfig()
 {
-    var config = AppConfig.Load(configPath);
+    WriteAutoConfig(configPath);
+    return 0;
+}
+
+static void WriteAutoConfig(string path)
+{
+    var config = AppConfig.Load(path);
     using var source = SensorSourceFactory.Create();
     source.Read();
     Thread.Sleep(1000);
@@ -101,9 +162,8 @@ int InitConfig()
         if (!config.Sensors.ContainsKey(role) && SensorSelector.AutoSelect(role, sensors) is { } s)
             config.Sensors[role] = s.Id;
     }
-    config.Save(configPath);
-    Console.WriteLine($"Wrote {configPath}");
-    return 0;
+    config.Save(path);
+    Console.WriteLine($"Wrote {path}");
 }
 
 async Task<int> Demo()
