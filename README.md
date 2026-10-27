@@ -126,11 +126,16 @@ The Windows service uses `C:\ProgramData\ttlcd\config.json`, the systemd unit `/
   "Sensors": {
     "CpuTemperature": "/intelcpu/0/temperature/26",
     "FanSpeed": "/lpc/nct6798d/0/fan/1",
-    "PumpSpeed": "/lpc/nct6798d/0/fan/5"
+    "PumpSpeed": "/lpc/nct6798d/0/fan/5",
+    "GpuTemperature": "none"         // switch a field off: not read, sent as 0
     // fields left out are chosen automatically
   }
 }
 ```
+
+Only hardware that hosts one of the chosen sensors is read. The LA series LCD shows just CPU
+temperature, CPU usage and fan speed, so setting the `Gpu*` fields to `"none"` skips the GPU and
+allows a shorter `SensorIntervalMs` (e.g. `500`). The service log lists the sensor chosen for each field.
 
 Fields: `CpuTemperature`, `CpuUsage`, `CpuPower`, `CpuClock`, `CpuVoltage`, `GpuTemperature`,
 `GpuUsage`, `GpuPower`, `GpuClock`, `FanSpeed`, `PumpSpeed`, `RamUsage`.

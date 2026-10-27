@@ -12,6 +12,10 @@ public sealed class LhmSensorSource : ISensorSource
 {
     private readonly Computer _computer;
 
+    // Hardware to update; null = all. Updating e.g. an Intel CPU via PawnIO takes ~350 ms
+    // and an ASUS embedded controller up to ~330 ms, so skipping unused hardware matters.
+    private HashSet<IHardware>? _focus;
+
     public LhmSensorSource()
     {
         _computer = new Computer
@@ -33,9 +37,22 @@ public sealed class LhmSensorSource : ISensorSource
         return list;
     }
 
-    private static void Collect(IHardware hardware, HardwareKind kind, List<SensorReading> list)
+    public void Focus(IReadOnlySet<string>? sensorIds)
     {
-        hardware.Update();
+        _focus = sensorIds?.Count > 0
+            ? _computer.Hardware
+                .SelectMany(h => h.SubHardware.Prepend(h))
+                .SelectMany(h => h.Sensors)
+                .Where(s => sensorIds.Contains(s.Identifier.ToString()))
+                .Select(s => s.Hardware)
+                .ToHashSet()
+            : null;
+    }
+
+    private void Collect(IHardware hardware, HardwareKind kind, List<SensorReading> list)
+    {
+        if (_focus is null || _focus.Contains(hardware))
+            hardware.Update();
         foreach (var sensor in hardware.Sensors)
         {
             list.Add(new SensorReading(

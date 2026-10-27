@@ -40,6 +40,13 @@ public class SensorSelectorTests
     }
 
     [Fact]
+    public void None_switches_a_field_off()
+    {
+        Assert.Null(SensorSelector.Resolve(DisplayRole.CpuTemperature, Sensors, "none"));
+        Assert.Null(SensorSelector.Resolve(DisplayRole.CpuTemperature, Sensors, "None"));
+    }
+
+    [Fact]
     public void Configured_sensor_wins_and_missing_one_is_not_replaced()
     {
         Assert.Equal("/cpu/t/core0", SensorSelector.Resolve(DisplayRole.CpuTemperature, Sensors, "/cpu/t/core0")?.Id);

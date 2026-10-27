@@ -9,14 +9,17 @@ public sealed class LcdService(AppConfig config)
 {
     private static readonly TimeSpan ReconnectDelay = TimeSpan.FromSeconds(2);
 
-    private readonly HashSet<DisplayRole> _reportedMissing = [];
+    // Sensor ID per LCD field, chosen once at start-up.
+    private Dictionary<DisplayRole, string> _selection = [];
 
     // Written by the sensor loop, read by the send loop.
     private volatile LcdFrame _frame = new();
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
-        using var sensors = SensorSourceFactory.Create();
+        using ISensorSource sensors = SensorSourceFactory.Create();
+        _selection = SelectSensors(sensors.Read());
+        sensors.Focus(_selection.Values.ToHashSet());
         _frame = BuildFrame(sensors.Read());
 
         // A sensor read can take over 500 ms (LibreHardwareMonitor), while the
@@ -92,16 +95,34 @@ public sealed class LcdService(AppConfig config)
         }
     }
 
-    private LcdFrame BuildFrame(IReadOnlyList<SensorReading> sensors)
+    private Dictionary<DisplayRole, string> SelectSensors(IReadOnlyList<SensorReading> sensors)
     {
-        double? Value(DisplayRole role)
+        var selection = new Dictionary<DisplayRole, string>();
+        foreach (var role in Enum.GetValues<DisplayRole>())
         {
             config.Sensors.TryGetValue(role, out var id);
             var sensor = SensorSelector.Resolve(role, sensors, id);
-            if (sensor is null && id is not null && _reportedMissing.Add(role))
-                Log.Warn($"Configured sensor for {role} not found: {id}");
-            return sensor?.Value;
+            if (sensor is not null)
+            {
+                selection[role] = sensor.Id;
+                Log.Info($"{role,-15} {sensor.Hardware} / {sensor.Name} ({sensor.Id})");
+            }
+            else if (SensorSelector.IsNone(id))
+                Log.Info($"{role,-15} off");
+            else if (id is not null)
+                Log.Warn($"{role,-15} configured sensor not found: {id}");
+            else
+                Log.Info($"{role,-15} no matching sensor");
         }
+        return selection;
+    }
+
+    private LcdFrame BuildFrame(IReadOnlyList<SensorReading> sensors)
+    {
+        var byId = sensors.DistinctBy(s => s.Id).ToDictionary(s => s.Id);
+
+        double? Value(DisplayRole role) =>
+            _selection.TryGetValue(role, out var id) && byId.TryGetValue(id, out var sensor) ? sensor.Value : null;
 
         return new LcdFrame
         {

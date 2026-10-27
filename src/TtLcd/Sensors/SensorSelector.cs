@@ -20,16 +20,26 @@ public enum DisplayRole
 /// <summary>Picks the sensor for each LCD field: the configured one, or a sensible default.</summary>
 public static class SensorSelector
 {
+    /// <summary>Config value that switches a field off (sent as 0, never read).</summary>
+    public const string None = "none";
+
     private static readonly string[] PumpNames = ["pump", "aio"];
+
+    public static bool IsNone(string? configuredId) =>
+        string.Equals(configuredId, None, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// A configured ID that no longer exists yields null rather than a
     /// different sensor, so the display never silently shows the wrong value.
     /// </summary>
-    public static SensorReading? Resolve(DisplayRole role, IReadOnlyList<SensorReading> sensors, string? configuredId) =>
-        string.IsNullOrEmpty(configuredId)
+    public static SensorReading? Resolve(DisplayRole role, IReadOnlyList<SensorReading> sensors, string? configuredId)
+    {
+        if (IsNone(configuredId))
+            return null;
+        return string.IsNullOrEmpty(configuredId)
             ? AutoSelect(role, sensors)
             : sensors.FirstOrDefault(s => s.Id == configuredId);
+    }
 
     public static SensorReading? AutoSelect(DisplayRole role, IReadOnlyList<SensorReading> sensors) => role switch
     {

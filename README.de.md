@@ -90,6 +90,10 @@ Ohne Konfigurationsdatei wählt `ttlcd` passende Sensoren automatisch. Für eine
 `ttlcd init-config` ausführen und die Datei anpassen — die Sensor-IDs zeigt `ttlcd list`.
 Details und Beispiel: [README.md#configuration](README.md#configuration).
 
+Gelesen wird nur die Hardware, zu der ein gewählter Sensor gehört. Das LCD der LA-Serie zeigt nur
+CPU-Temperatur, CPU-Auslastung und Lüfterdrehzahl — wer die `Gpu*`-Felder auf `"none"` setzt, spart
+das Auslesen der Grafikkarte und kann `SensorIntervalMs` verkürzen (z. B. `500`).
+
 ## Mitmachen
 
 Beiträge sind sehr willkommen — Fehlerberichte, Tests auf anderer Hardware, Linux-Feedback, Code.
