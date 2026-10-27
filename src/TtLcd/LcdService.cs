@@ -11,14 +11,48 @@ public sealed class LcdService(AppConfig config)
 
     private readonly HashSet<DisplayRole> _reportedMissing = [];
 
+    // Written by the sensor loop, read by the send loop.
+    private volatile LcdFrame _frame = new();
+
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         using var sensors = SensorSourceFactory.Create();
+        _frame = BuildFrame(sensors.Read());
+
+        // A sensor read can take over 500 ms (LibreHardwareMonitor), while the
+        // LCD switches off within a second without packets. Reading on its own
+        // thread keeps the send cadence steady.
+        using var stopSensors = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var sensorLoop = Task.Run(() => ReadSensorsAsync(sensors, stopSensors.Token), CancellationToken.None);
+        try
+        {
+            await SendLoopAsync(cancellationToken);
+        }
+        finally
+        {
+            stopSensors.Cancel();
+            await sensorLoop;
+        }
+    }
+
+    private async Task ReadSensorsAsync(ISensorSource sensors, CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(Math.Max(100, config.SensorIntervalMs)));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+                _frame = BuildFrame(sensors.Read());
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+    }
+
+    private async Task SendLoopAsync(CancellationToken cancellationToken)
+    {
         using var lcd = new LcdDevice();
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(Math.Max(50, config.SendIntervalMs)));
 
-        var frame = new LcdFrame();
-        long nextSensorRead = 0;
         long nextConnectAttempt = 0;
         bool waitingLogged = false;
 
@@ -27,12 +61,6 @@ public sealed class LcdService(AppConfig config)
             do
             {
                 var now = Environment.TickCount64;
-                if (now >= nextSensorRead)
-                {
-                    frame = BuildFrame(sensors.Read());
-                    nextSensorRead = now + config.SensorIntervalMs;
-                }
-
                 if (!lcd.IsConnected)
                 {
                     if (now < nextConnectAttempt)
@@ -49,7 +77,7 @@ public sealed class LcdService(AppConfig config)
                     waitingLogged = false;
                 }
 
-                if (!lcd.Send(LcdPacket.Update(frame with { Time = DateTime.Now }, config.TemperatureUnit)))
+                if (!lcd.Send(LcdPacket.Update(_frame with { Time = DateTime.Now }, config.TemperatureUnit)))
                     Log.Warn("LCD disconnected.");
             }
             while (await timer.WaitForNextTickAsync(cancellationToken));

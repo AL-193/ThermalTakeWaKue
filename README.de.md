@@ -39,6 +39,11 @@ Für CPU-Temperaturen und Mainboard-Lüfteranschlüsse sind **Administratorrecht
 verwendet und ersetzt den alten WinRing0-Treiber, den Windows Defender inzwischen blockiert).
 GPU-Werte, CPU-Auslastung und RAM funktionieren auch ohne.
 
+> ℹ️ Die Builds sind **noch nicht code-signiert**. Ist in Windows 11 *Smart App Control* aktiv,
+> wird `ttlcd.exe` blockiert. Bis es signierte Releases gibt, aus dem Quellcode mit dem .NET SDK
+> starten (`dotnet run --project src/TtLcd -- run`). Smart App Control dafür **nicht** abschalten —
+> es lässt sich ohne Windows-Neuinstallation nicht wieder einschalten.
+
 1. PawnIO von <https://pawnio.eu/> installieren.
 2. `ttlcd.exe` in einen Ordner entpacken, z. B. `C:\Tools\ttlcd`.
 3. In einem **Administrator**-Terminal ausprobieren:

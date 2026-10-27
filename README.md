@@ -46,6 +46,11 @@ Reading CPU temperatures and mainboard fan headers requires **administrator righ
 which replaces the old WinRing0 driver that Windows Defender now blocks). GPU values, CPU usage
 and RAM work without it.
 
+> ℹ️ Builds are **not code-signed yet**. If Windows 11 *Smart App Control* is on, it blocks
+> `ttlcd.exe`. Until signed releases exist, run it from source with the .NET SDK
+> (`dotnet run --project src/TtLcd -- run`). Do **not** turn Smart App Control off for this —
+> it cannot be turned back on without reinstalling Windows.
+
 1. Install PawnIO from <https://pawnio.eu/>.
 2. Unpack `ttlcd.exe` to a folder, e.g. `C:\Tools\ttlcd`.
 3. In an **administrator** terminal, try it:
@@ -150,6 +155,7 @@ packaging/    autostart scripts (Windows), udev rule + systemd unit (Linux)
 - [x] Restore the LCD functionality of the original software (CLI / background service)
 - [ ] Tray app / GUI for choosing sensors
 - [ ] Show coolant temperature (e.g. ASUS "Water In/Out" headers) on a free field
+- [ ] Code-signed Windows releases (e.g. via SignPath Foundation for open-source projects)
 - [ ] Release builds and packages (winget, AUR, .deb)
 - [ ] Support for further Thermaltake LCD models
 
