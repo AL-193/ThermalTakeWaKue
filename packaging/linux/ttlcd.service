@@ -1,0 +1,11 @@
+[Unit]
+Description=Thermaltake segment LCD driver
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/local/bin/ttlcd run --config /etc/ttlcd/config.json
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

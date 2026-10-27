@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test
+        run: dotnet test -c Release
+
+      - name: Publish
+        run: dotnet publish src/TtLcd -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o publish
+
+      - name: Add packaging files
+        shell: bash
+        run: |
+          if [ "${{ matrix.rid }}" = "win-x64" ]; then cp packaging/windows/*.ps1 publish/; else cp packaging/linux/* publish/; fi
+          cp README.md publish/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ttlcd-${{ matrix.rid }}
+          path: publish/

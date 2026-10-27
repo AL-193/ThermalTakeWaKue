@@ -1,0 +1,4 @@
+# Thermaltake segment LCD (LA series water blocks)
+# Lets logged-in users talk to the display without root.
+# Install: sudo cp 99-ttlcd.rules /etc/udev/rules.d/ && sudo udevadm control --reload && sudo udevadm trigger
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="5131", ATTRS{idProduct}=="2007", MODE="0660", TAG+="uaccess"
