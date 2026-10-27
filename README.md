@@ -18,15 +18,15 @@ Windows-only, closed source and starts a full GUI just to push a few numbers ove
 - 🔌 **Hot-plug aware** — reconnects when the USB device comes back
 - 📖 **Documented protocol** — see [docs/PROTOCOL.md](docs/PROTOCOL.md)
 
-> **Status:** early development. The display protocol is fully implemented and being tested on
-> Windows 11 (Intel Core i9-14900KF, ASUS ROG Maximus Z790 Formula, RTX 3090).
+> **Status:** early development. The display protocol is fully implemented and verified on real
+> hardware (Windows 11, Intel Core i9-14900KF, ASUS ROG Maximus Z790 Formula, RTX 3090).
 > The Linux sensor backend is implemented but still needs testing on real machines — reports welcome!
 
 ## Supported hardware
 
 | Device | USB ID | Status |
 |--------|--------|--------|
-| Thermaltake LA series water block with segment LCD | `5131:2007` | ✅ works |
+| Thermaltake LA series water block with segment LCD | `5131:2007` | ✅ works — shows CPU temperature, CPU usage and fan speed |
 
 Do you have a different Thermaltake LCD? Run `ttlcd list` and open an issue with the output of
 `lsusb` (Linux) or the device ID from Device Manager (Windows).

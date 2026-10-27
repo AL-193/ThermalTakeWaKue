@@ -90,7 +90,18 @@ Sent by the official software when it exits; the display goes dark.
 | 1 | `0x0F` |
 | 2–63 | `0x00` |
 
+## What the display shows
+
+The packet carries more values than a given LCD can show. Confirmed so far:
+
+| LCD | Shown | Not shown |
+|-----|-------|-----------|
+| LA series water block (`5131:2007`) | CPU temperature (large digits, integer part), CPU usage % with bar graph, fan speed (RPM) with bar graph | GPU values, pump speed, CPU power/clock/voltage, RAM, date/time |
+
+At 1234 RPM the fan bar is about half full; the full-scale value is not known yet.
+
 ## Open questions
 
-- Which of the fields are actually shown depends on the LCD model — please report what yours shows.
+- Full scale of the fan bar graph.
+- Whether other LCD models use the remaining fields — please report what yours shows.
 - The input report is never read by the official software; its meaning is unknown.

@@ -18,8 +18,9 @@ Zahlen per USB zu verschicken.
 - 🔌 **Hot-Plug** — verbindet sich automatisch neu, wenn das USB-Gerät zurückkommt
 - 📖 **Dokumentiertes Protokoll** — siehe [docs/PROTOCOL.md](docs/PROTOCOL.md)
 
-> **Status:** frühe Entwicklung. Das Display-Protokoll ist vollständig umgesetzt und wird unter
-> Windows 11 getestet (Intel Core i9-14900KF, ASUS ROG Maximus Z790 Formula, RTX 3090).
+> **Status:** frühe Entwicklung. Das Display-Protokoll ist vollständig umgesetzt und auf echter
+> Hardware bestätigt (Windows 11, Intel Core i9-14900KF, ASUS ROG Maximus Z790 Formula, RTX 3090).
+> Das LCD der LA-Serie zeigt CPU-Temperatur, CPU-Auslastung und Lüfterdrehzahl.
 > Das Linux-Sensor-Backend ist implementiert, muss aber noch auf echten Systemen getestet werden —
 > Rückmeldungen sind willkommen!
 
