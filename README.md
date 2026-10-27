@@ -195,8 +195,7 @@ packaging/    udev rule + systemd unit (Linux)
 - [x] Restore the LCD functionality of the original software (CLI)
 - [x] Run as a Windows service / systemd service, starting at boot
 - [x] Settings window (`ttlcd-settings`) and console menu (`ttlcd configure`)
-- [ ] Tray icon
-- [ ] Show coolant temperature (e.g. ASUS "Water In/Out" headers) on a free field
+- [ ] Tray icon for the settings window (after code signing, so it also runs with Smart App Control)
 - [ ] Code-signed Windows releases (e.g. via SignPath Foundation for open-source projects)
 - [ ] Release builds and packages (winget, AUR, .deb)
 - [ ] Support for further Thermaltake LCD models
