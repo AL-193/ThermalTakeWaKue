@@ -5,21 +5,24 @@
 [![Build](https://github.com/AL-193/ThermalTakeWaKue/actions/workflows/build.yml/badge.svg)](https://github.com/AL-193/ThermalTakeWaKue/actions/workflows/build.yml)
 &nbsp;🇩🇪 [Deutsche Version](README.de.md)
 
-Thermaltake's CPU water blocks of the LA series carry a small segment LCD that shows CPU/GPU
-temperatures, fan and pump speed and more. The official tool, *TT SEGMENT LCD LA SERIES*, is
-Windows-only, closed source and starts a full GUI just to push a few numbers over USB.
+Thermaltake's LA series AIO water coolers carry a small segment LCD on the pump block that shows
+the CPU temperature, CPU usage and fan speed. It only works while software on the PC keeps feeding
+it values over USB. The official tool, *TT SEGMENT LCD LA SERIES*, is Windows-only, closed source
+and starts a full GUI just to push a few numbers.
 
 `ttlcd` is a small, lightweight replacement:
 
 - 🖥️ **Windows and Linux** — one self-contained executable per platform, no runtime to install
-- 🌡️ **Same values as the original** — CPU & GPU temperature, usage, power and clock, CPU voltage,
-  fan speed, pump speed, RAM usage, date and time
-- 🔧 **Pick any sensor** for any field — e.g. use a specific chassis fan header as "pump"
+- ⚙️ **Runs in the background** — as a Windows service or systemd service, starting at boot
+- 🌡️ **Real sensor values** — CPU temperature, CPU usage and fan speed, updated twice a second
+- 🔧 **Settings without admin rights** — switch the display between CPU and GPU, choose the fan
+  header, °C/°F and update interval (settings window or `ttlcd configure`)
 - 🔌 **Hot-plug aware** — reconnects when the USB device comes back
 - 📖 **Documented protocol** — see [docs/PROTOCOL.md](docs/PROTOCOL.md)
 
 > **Status:** early development. The display protocol is fully implemented and verified on real
 > hardware (Windows 11, Intel Core i9-14900KF, ASUS ROG Maximus Z790 Formula, RTX 3090).
+> The protocol also carries GPU, pump, RAM and clock values; the LA series LCD does not show them.
 > The Linux sensor backend is implemented but still needs testing on real machines — reports welcome!
 
 ## Supported hardware

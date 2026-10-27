@@ -4,23 +4,25 @@
 
 🇬🇧 [English version](README.md)
 
-Die CPU-Wasserkühler der Thermaltake-LA-Serie haben ein kleines Segment-LCD, das CPU-/GPU-Temperatur,
-Lüfter- und Pumpendrehzahl und mehr anzeigt. Das offizielle Programm *TT SEGMENT LCD LA SERIES*
+Die AIO-Wasserkühlungen der Thermaltake-LA-Serie haben auf dem Pumpenblock ein kleines Segment-LCD,
+das CPU-Temperatur, CPU-Auslastung und Lüfterdrehzahl anzeigt. Es funktioniert nur, solange ein
+Programm auf dem PC ihm laufend Werte per USB schickt. Das offizielle Programm *TT SEGMENT LCD LA SERIES*
 läuft nur unter Windows, ist Closed Source und startet eine komplette Oberfläche, nur um ein paar
-Zahlen per USB zu verschicken.
+Zahlen zu verschicken.
 
 `ttlcd` ist ein schlanker Ersatz:
 
 - 🖥️ **Windows und Linux** — eine eigenständige Programmdatei pro Plattform, keine Runtime nötig
-- 🌡️ **Dieselben Werte wie das Original** — CPU- & GPU-Temperatur, Auslastung, Leistung und Takt,
-  CPU-Spannung, Lüfterdrehzahl, Pumpendrehzahl, RAM-Auslastung, Datum und Uhrzeit
-- 🔧 **Freie Sensorwahl** für jedes Feld — z. B. einen bestimmten Gehäuselüfter-Anschluss als „Pumpe“
+- ⚙️ **Läuft im Hintergrund** — als Windows-Dienst bzw. systemd-Dienst, startet mit dem System
+- 🌡️ **Echte Sensorwerte** — CPU-Temperatur, CPU-Auslastung und Lüfterdrehzahl, zweimal pro Sekunde aktualisiert
+- 🔧 **Einstellungen ohne Admin-Rechte** — Anzeige zwischen CPU und GPU umschalten, Lüfteranschluss,
+  °C/°F und Aktualisierungsintervall wählen (Einstellungsfenster oder `ttlcd configure`)
 - 🔌 **Hot-Plug** — verbindet sich automatisch neu, wenn das USB-Gerät zurückkommt
 - 📖 **Dokumentiertes Protokoll** — siehe [docs/PROTOCOL.md](docs/PROTOCOL.md)
 
 > **Status:** frühe Entwicklung. Das Display-Protokoll ist vollständig umgesetzt und auf echter
 > Hardware bestätigt (Windows 11, Intel Core i9-14900KF, ASUS ROG Maximus Z790 Formula, RTX 3090).
-> Das LCD der LA-Serie zeigt CPU-Temperatur, CPU-Auslastung und Lüfterdrehzahl.
+> Das Protokoll überträgt auch GPU-, Pumpen-, RAM- und Taktwerte; das LCD der LA-Serie zeigt sie nicht an.
 > Das Linux-Sensor-Backend ist implementiert, muss aber noch auf echten Systemen getestet werden —
 > Rückmeldungen sind willkommen!
 
