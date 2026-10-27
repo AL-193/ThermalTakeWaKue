@@ -93,12 +93,33 @@ sudo cp packaging/linux/ttlcd.service /etc/systemd/system/
 sudo systemctl enable --now ttlcd
 ```
 
+## Settings
+
+While ttlcd runs (e.g. as a service), its settings can be changed **without administrator
+rights** — changes are validated, saved and applied immediately:
+
+- **`ttlcd-settings`** — a small window (Windows and Linux): CPU or GPU on the display, which fan,
+  °C/°F, update interval, plus a live preview of what the LCD shows.
+- **`ttlcd configure`** — the same as a console menu (arrow keys + Enter).
+
+| | |
+|---|---|
+| Display: CPU / GPU | The LA series LCD has fixed CPU temperature and usage fields. In GPU mode they show the graphics card instead (the printed labels stay "CPU"). |
+| Fan | Any fan header the system reports, with its current speed. |
+
+Both talk to ttlcd over a local named pipe (a Unix socket on Linux). On Windows only users logged
+in at the PC can connect; network access is denied.
+
+> ℹ️ With Windows *Smart App Control* on, the unsigned settings window is blocked until releases
+> are code-signed. Use `ttlcd configure` there in the meantime.
+
 ## Usage
 
 ```
 ttlcd [command] [--config <path>]
 
   run           Keep the LCD updated with sensor values (default)
+  configure     Change the settings of the running ttlcd (menu, no admin needed)
   list          Show all sensors and which one each LCD field uses
   init-config   Write a config file with the current sensor choices
   demo          Show fixed test values on the LCD
@@ -153,14 +174,17 @@ dotnet publish src/TtLcd -c Release -r linux-x64 -p:PublishSingleFile=true --sel
 ### Project layout
 
 ```
-src/TtLcd/
+src/TtLcd/            ttlcd – the driver (CLI and service)
   Protocol/   LcdPacket – encodes the 64-byte HID reports (pure, unit-tested)
   Device/     LcdDevice – finds and writes to the USB HID device (HidSharp)
   Sensors/    LhmSensorSource (Windows, LibreHardwareMonitor)
               LinuxSensorSource (hwmon, /proc, RAPL) + NvmlGpuReader (NVIDIA)
-              SensorSelector – maps sensors to LCD fields
-  LcdService  main loop: sensors on their own thread, packet every 250 ms, reconnect on unplug
+  LcdService  main loop: sensors on their own thread, packet every 250 ms, live settings
+  ConfigServer  named pipe for the settings app / `ttlcd configure`
   LcdWorker / WindowsService   service hosting (Windows service, systemd) and install commands
+src/TtLcd.Core/       shared by driver and settings app: AppConfig, SensorSelector,
+                      ConfigRules, IPC protocol + client
+src/TtLcd.Settings/   ttlcd-settings – settings window (Avalonia)
 tests/TtLcd.Tests/
 docs/PROTOCOL.md
 packaging/    udev rule + systemd unit (Linux)
@@ -170,7 +194,8 @@ packaging/    udev rule + systemd unit (Linux)
 
 - [x] Restore the LCD functionality of the original software (CLI)
 - [x] Run as a Windows service / systemd service, starting at boot
-- [ ] Tray app / GUI for choosing sensors
+- [x] Settings window (`ttlcd-settings`) and console menu (`ttlcd configure`)
+- [ ] Tray icon
 - [ ] Show coolant temperature (e.g. ASUS "Water In/Out" headers) on a free field
 - [ ] Code-signed Windows releases (e.g. via SignPath Foundation for open-source projects)
 - [ ] Release builds and packages (winget, AUR, .deb)

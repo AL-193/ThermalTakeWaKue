@@ -43,4 +43,7 @@ public sealed class AppConfig
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
         File.WriteAllText(path, JsonSerializer.Serialize(this, JsonOptions));
     }
+
+    public AppConfig Clone() =>
+        JsonSerializer.Deserialize<AppConfig>(JsonSerializer.Serialize(this, JsonOptions), JsonOptions)!;
 }

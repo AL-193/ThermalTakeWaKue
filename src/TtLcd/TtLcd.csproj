@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>TtLcd</RootNamespace>
     <AssemblyName>ttlcd</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>AL-193; Claude (Anthropic)</Authors>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <Description>Open-source driver for the Thermaltake segment LCD on LA series water blocks.</Description>
@@ -23,6 +23,10 @@
     <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.14" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TtLcd.Core\TtLcd.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

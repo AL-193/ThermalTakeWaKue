@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TtLcd.Settings.MainWindow"
+        Width="500"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen">
+  <StackPanel Margin="24" Spacing="18">
+
+    <Border CornerRadius="8" Padding="16,12" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+      <StackPanel Spacing="2">
+        <TextBlock x:Name="PreviewLabel" FontSize="12" Opacity="0.7" />
+        <TextBlock x:Name="PreviewText" FontSize="26" FontWeight="SemiBold" Text="–" />
+      </StackPanel>
+    </Border>
+
+    <Grid x:Name="Form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
+      <TextBlock x:Name="DisplayLabel" VerticalAlignment="Center" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="20">
+        <RadioButton x:Name="SourceCpu" GroupName="Source" Content="CPU" />
+        <RadioButton x:Name="SourceGpu" GroupName="Source" Content="GPU" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="1" x:Name="FanLabel" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="1" Grid.Column="1" x:Name="FanBox" HorizontalAlignment="Stretch" />
+
+      <TextBlock Grid.Row="2" x:Name="UnitLabel" VerticalAlignment="Center" />
+      <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="20">
+        <RadioButton x:Name="UnitCelsius" GroupName="Unit" Content="°C" />
+        <RadioButton x:Name="UnitFahrenheit" GroupName="Unit" Content="°F" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="3" x:Name="IntervalLabel" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="3" Grid.Column="1" x:Name="IntervalBox" HorizontalAlignment="Stretch" />
+    </Grid>
+
+    <TextBlock x:Name="GpuNote" TextWrapping="Wrap" FontSize="12" Opacity="0.7" IsVisible="False" />
+
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+        <Button x:Name="ReloadButton" />
+        <Button x:Name="ApplyButton" Classes="accent" />
+      </StackPanel>
+      <TextBlock x:Name="StatusText" TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0" />
+    </DockPanel>
+
+  </StackPanel>
+</Window>

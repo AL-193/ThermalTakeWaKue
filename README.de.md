@@ -84,6 +84,22 @@ sudo cp packaging/linux/ttlcd.service /etc/systemd/system/
 sudo systemctl enable --now ttlcd
 ```
 
+## Einstellungen
+
+Während ttlcd läuft (z. B. als Dienst), lassen sich die Einstellungen **ohne Administratorrechte**
+ändern — sie werden geprüft, gespeichert und sofort übernommen:
+
+- **`ttlcd-settings`** — kleines Fenster (Windows und Linux): CPU oder GPU auf dem Display, welcher
+  Lüfter, °C/°F, Aktualisierungsintervall und eine Live-Vorschau dessen, was das LCD zeigt.
+- **`ttlcd configure`** — dasselbe als Menü im Terminal (Pfeiltasten + Enter).
+
+Im GPU-Modus zeigen die Temperatur- und Auslastungsfelder des LCDs die Grafikkarte (die Beschriftung
+auf dem LCD bleibt „CPU“). Beide Programme sprechen über eine lokale Named Pipe mit ttlcd; unter
+Windows dürfen sich nur am PC angemeldete Benutzer verbinden, Netzwerkzugriff ist gesperrt.
+
+> ℹ️ Mit aktivem *Smart App Control* blockiert Windows das unsignierte Einstellungsfenster, bis es
+> signierte Releases gibt. Bis dahin `ttlcd configure` verwenden.
+
 ## Konfiguration
 
 Ohne Konfigurationsdatei wählt `ttlcd` passende Sensoren automatisch. Für eine eigene Auswahl

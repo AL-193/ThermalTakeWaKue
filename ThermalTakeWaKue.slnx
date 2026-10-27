@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/TtLcd.Core/TtLcd.Core.csproj" />
+    <Project Path="src/TtLcd.Settings/TtLcd.Settings.csproj" />
     <Project Path="src/TtLcd/TtLcd.csproj" />
   </Folder>
   <Folder Name="/tests/">

@@ -1,11 +1,5 @@
 namespace TtLcd.Protocol;
 
-public enum TemperatureUnit
-{
-    Celsius,
-    Fahrenheit,
-}
-
 /// <summary>
 /// One set of values for the segment LCD. Temperatures are always in °C;
 /// conversion to °F happens while encoding. A null value is sent as 0.

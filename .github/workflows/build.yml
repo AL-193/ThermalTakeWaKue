@@ -26,7 +26,9 @@ jobs:
         run: dotnet test -c Release
 
       - name: Publish
-        run: dotnet publish src/TtLcd -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o publish
+        run: |
+          dotnet publish src/TtLcd -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o publish
+          dotnet publish src/TtLcd.Settings -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o publish
 
       - name: Add packaging files
         shell: bash
@@ -53,6 +55,7 @@ jobs:
       - name: Publish
         run: |
           dotnet publish src/TtLcd -c Release -p:UseAppHost=false -o publish
+          dotnet publish src/TtLcd.Settings -c Release -p:UseAppHost=false -o publish
           cp README.md LICENSE publish/
 
       - uses: actions/upload-artifact@v4

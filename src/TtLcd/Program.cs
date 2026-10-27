@@ -16,6 +16,7 @@ const string Usage = """
 
     Commands:
       run           Keep the LCD updated with sensor values (default)
+      configure     Change the settings of the running ttlcd (menu, no admin needed)
       list          Show all sensors and which one each LCD field uses
       init-config   Write a config file with the current sensor choices
       demo          Show fixed test values on the LCD
@@ -46,6 +47,7 @@ try
     return command switch
     {
         "run" => await Run(),
+        "configure" => await ConfigureCommand.RunAsync(),
         "list" => List(),
         "init-config" => InitConfig(),
         "demo" => await Demo(),
@@ -76,14 +78,14 @@ async Task<int> Run()
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddWindowsService(o => o.ServiceName = "ttlcd");
         builder.Services.AddSystemd();
-        builder.Services.AddSingleton(config);
+        builder.Services.AddSingleton(new RunOptions(config, configPath));
         builder.Services.AddHostedService<LcdWorker>();
         await builder.Build().RunAsync();
         return 0;
     }
 
     using var cts = CancelOnShutdown();
-    await new LcdService(config).RunAsync(cts.Token);
+    await Runner.RunAsync(new RunOptions(config, configPath), cts.Token);
     return 0;
 }
 
